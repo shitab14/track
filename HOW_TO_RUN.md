@@ -4,7 +4,28 @@ This guide covers running the application in development, standalone mode, or un
 
 ---
 
-## 1. Quick Start: Database (PostgreSQL via Docker)
+## 1. One-Command Master Control (Recommended)
+
+To run the **entire stack locally** (PostgreSQL Database + Database Migrations + Backend API + Frontend UI) with a single command:
+
+### Start Entire System
+```bash
+./scripts/start_all.sh
+```
+* Spins up PostgreSQL 16 container via Docker and waits until healthy.
+* Automatically applies Alembic database migrations.
+* Starts the FastAPI backend at `http://localhost:8000` (background process, logs in `.run/backend.log`).
+* Starts the Next.js frontend at `http://localhost:3000` (background process, logs in `.run/frontend.log`).
+
+### Stop Entire System
+```bash
+./scripts/stop_all.sh
+```
+* Gracefully terminates the Frontend, Backend, and stops the PostgreSQL Docker container.
+
+---
+
+## 2. Independent Service Runners
 
 You don't need PostgreSQL installed locally! A pre-configured Docker Compose service is ready to run.
 

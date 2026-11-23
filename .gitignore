@@ -51,6 +51,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Runtime PIDs & Local execution logs
+.run/
+
 # IDEs & OS files
 .idea/
 .vscode/
