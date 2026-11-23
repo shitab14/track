@@ -70,8 +70,10 @@ You don't need PostgreSQL installed locally! A pre-configured Docker Compose ser
 * Interactive API docs: `http://localhost:8000/docs`.
 * **Browser Test Endpoints (GET)**:
   - `http://localhost:8000/`: Welcome root endpoint.
-  - `http://localhost:8000/api/v1/health`: System health status and clock info.
+  - `http://localhost:8000/api/v1/health`: Detailed health status reporting both `backend` and `database` connectivity.
   - `http://localhost:8000/api/v1/mock/team-summary`: Rich mock team summary showing the standard envelope with sample measurables and issues.
+* **Frontend Status Monitoring**:
+  - The frontend UI (`http://localhost:3000`) displays live, real-time status indicators in the bottom-right corner for both **Backend** and **DB** (online/offline).
 
 ### Run Frontend (Next.js)
 ```bash

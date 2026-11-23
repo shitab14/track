@@ -9,32 +9,49 @@ echo "========================================================"
 echo "   Starting TRACK - EOS Management System Locally"
 echo "========================================================"
 
-# Create pids directory for clean shutdown tracking
 mkdir -p "$ROOT_DIR/.run"
 
-# 1. Start PostgreSQL via Docker Compose
+# 1. Start Database (Auto-detect Docker vs Local PostgreSQL)
 echo ""
-echo "==> [1/4] Starting PostgreSQL database container..."
-docker compose -f docker-compose.db.yml up -d
+echo "==> [1/4] Ensuring PostgreSQL database is running..."
 
-echo "==> Waiting for PostgreSQL to be healthy..."
-until docker compose -f docker-compose.db.yml exec -T db pg_isready -U postgres -d track_db > /dev/null 2>&1; do
-    sleep 1
-done
-echo "==> PostgreSQL is ready on port 5432."
+if command -v docker &> /dev/null && docker info &> /dev/null; then
+    echo "==> Docker detected! Starting PostgreSQL container via Docker Compose..."
+    docker compose -f docker-compose.db.yml up -d
+    echo "==> Waiting for Docker PostgreSQL to be ready..."
+    until docker compose -f docker-compose.db.yml exec -T db pg_isready -U postgres -d track_db > /dev/null 2>&1; do
+        sleep 1
+    done
+    echo "==> Docker PostgreSQL is ready on port 5432."
+elif command -v pg_isready &> /dev/null && pg_isready -q; then
+    echo "==> Local PostgreSQL service is running and healthy on port 5432."
+elif [ -x "/opt/homebrew/opt/postgresql@16/bin/pg_isready" ] && /opt/homebrew/opt/postgresql@16/bin/pg_isready -q; then
+    echo "==> Local Homebrew PostgreSQL 16 is running on port 5432."
+else
+    echo "==> PostgreSQL is not running. Attempting to start via Homebrew service..."
+    brew services start postgresql@16 2>/dev/null || brew services start postgresql 2>/dev/null || true
+    sleep 2
+    if ! command -v docker &> /dev/null && ! command -v pg_isready &> /dev/null && [ ! -x "/opt/homebrew/opt/postgresql@16/bin/pg_isready" ]; then
+        echo "ERROR: Neither Docker nor PostgreSQL service could be detected."
+        echo "Please run: ./scripts/installations/install_all.sh"
+        exit 1
+    fi
+fi
 
 # 2. Run Database Migrations
 echo ""
 echo "==> [2/4] Applying database migrations..."
-if [ -d "$ROOT_DIR/backend/.venv" ]; then
-    source "$ROOT_DIR/backend/.venv/bin/activate"
+if [ ! -d "$ROOT_DIR/backend/.venv" ]; then
+    python3 -m venv "$ROOT_DIR/backend/.venv"
 fi
+source "$ROOT_DIR/backend/.venv/bin/activate"
 
 cd "$ROOT_DIR/backend"
 if [ ! -f ".env" ] && [ -f ".env.example" ]; then
     cp .env.example .env
 fi
 
+pip install --quiet -r requirements.txt
 alembic upgrade head
 echo "==> Migrations applied successfully."
 
@@ -42,13 +59,6 @@ echo "==> Migrations applied successfully."
 echo ""
 echo "==> [3/4] Starting Backend (FastAPI) on port 8000..."
 cd "$ROOT_DIR/backend"
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
-source .venv/bin/activate
-pip install --quiet -r requirements.txt
-
-# Run backend in background and save PID
 nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > "$ROOT_DIR/.run/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo $BACKEND_PID > "$ROOT_DIR/.run/backend.pid"
