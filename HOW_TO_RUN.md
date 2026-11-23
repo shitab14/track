@@ -4,9 +4,39 @@ This guide covers running the application in development, standalone mode, or un
 
 ---
 
-## 1. Quick Start with Runner Scripts
+## 1. Quick Start: Database (PostgreSQL via Docker)
 
-The repository provides executable runner scripts under each service's `scripts/` directory:
+You don't need PostgreSQL installed locally! A pre-configured Docker Compose service is ready to run.
+
+### Start PostgreSQL
+```bash
+./backend/scripts/start_db.sh
+```
+* Spins up PostgreSQL 16 container (`track_postgres`) on port `5432`.
+* Database: `track_db` | User: `postgres` | Password: `postgres`.
+* Automatically waits until the database is healthy and ready to accept connections.
+* Data is safely persisted in a Docker volume (`track_pgdata`).
+
+### Apply Database Migrations (Schema Creation)
+```bash
+./backend/scripts/run_migrations.sh
+```
+* Applies Alembic migrations to create all tables, check constraints, foreign keys, and concurrency indexes.
+
+### Reset Database (Clean Schema Rebuild)
+```bash
+./backend/scripts/reset_db.sh
+```
+* Wipes all tables and re-applies migrations cleanly from scratch.
+
+### Stop PostgreSQL
+```bash
+./backend/scripts/stop_db.sh
+```
+
+---
+
+## 2. Quick Start with Service Runner Scripts
 
 ### Run Backend (FastAPI)
 ```bash
@@ -32,9 +62,9 @@ The repository provides executable runner scripts under each service's `scripts/
 
 ---
 
-## 2. Running Individual Test Suites
+## 3. Running Test Suites
 
-### Backend Tests
+### Backend Tests (Health & Model Unit Tests)
 ```bash
 ./backend/scripts/test_be.sh
 ```
@@ -46,7 +76,7 @@ The repository provides executable runner scripts under each service's `scripts/
 
 ---
 
-## 3. Standard Response Contract
+## 4. Standard Response Contract
 
 All backend endpoints strictly follow the uniform envelope:
 ```json
@@ -67,8 +97,8 @@ In case of any HTTP or database error, the response returns the error status wit
 
 ---
 
-## 4. Upcoming Steps on Roadmap
+## 5. Upcoming Steps on Roadmap
 
-- **ADR0001**: PostgreSQL database schema, migrations, constraints & relations.
 - **ADR0002**: Timezone and simulated clock (`APP_NOW`) integration.
 - **ADR0003**: Idempotent database seeder (`seed.json`).
+- **ADR0004**: Business Rules Engine.
