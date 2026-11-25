@@ -32,7 +32,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Implement Issue ordering algorithm (Priority 5 down to 1, oldest first, no priority last).
   - Implement Meeting rating calculation (average to 1 decimal, excluding non-ratings).
 
-- [ ] **ADR0005: Rules Report CLI Command (`rules_report.json`)**
+- [x] **ADR0005: Rules Report CLI Command (`rules_report.json`)**
   - Build CLI command to calculate and print the required JSON structure for any `APP_NOW`.
   - Format output matching the exact structure defined in `task_resources/README.md`.
   - Validate output against `seed.json` initial state and commit `rules_report.json`.
