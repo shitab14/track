@@ -54,7 +54,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Design unique constraint or atomic transaction mechanism to prevent duplicate Issues for the same Measurable and week.
   - Handle race conditions gracefully when multiple users click "Make it an Issue" simultaneously.
 
-- [ ] **ADR0009: Real-Time Sync & Meeting State Machine Architecture**
+- [x] **ADR0009: Real-Time Sync & Meeting State Machine Architecture**
   - Design real-time synchronization layer (e.g., WebSockets or Server-Sent Events).
   - Manage Level 10 Meeting state machine: Facilitator controls, Section agenda (Scorecard 5m -> IDS 60m -> Conclude 10m), server-owned timer.
   - Handle attendee presence, live rating submissions, late joins, and browser reconnects.
