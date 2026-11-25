@@ -178,7 +178,6 @@ class Issue(Base):
     todos: Mapped[List["Todo"]] = relationship("Todo", back_populates="source_issue")
 
     __table_args__ = (
-        CheckConstraint("priority IS NULL OR (priority >= 1 AND priority <= 5)", name="chk_issue_priority"),
         CheckConstraint(
             "(source_measurable_id IS NULL AND source_week_start IS NULL) OR (source_measurable_id IS NOT NULL AND source_week_start IS NOT NULL)",
             name="chk_issue_source_integrity"
@@ -193,6 +192,7 @@ class Issue(Base):
             "source_measurable_id",
             "source_week_start",
             unique=True,
+            sqlite_where=(solved_at.is_(None) & source_measurable_id.isnot(None)),
             postgresql_where=(solved_at.is_(None) & source_measurable_id.isnot(None))
         ),
     )
@@ -238,6 +238,7 @@ class Meeting(Base):
             "uq_active_team_meeting",
             "team_id",
             unique=True,
+            sqlite_where=(ended_at.is_(None)),
             postgresql_where=(ended_at.is_(None))
         ),
     )

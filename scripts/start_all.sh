@@ -55,9 +55,15 @@ pip install --quiet -r requirements.txt
 alembic upgrade head
 echo "==> Migrations applied successfully."
 
-# 3. Start Backend (FastAPI) in Background
+# 3. Seed Database
 echo ""
-echo "==> [3/4] Starting Backend (FastAPI) on port 8000..."
+echo "==> [3/5] Seeding database with initial data (seed.json)..."
+python -m app.db.seed
+echo "==> Database seeded successfully."
+
+# 4. Start Backend (FastAPI) in Background
+echo ""
+echo "==> [4/5] Starting Backend (FastAPI) on port 8000..."
 cd "$ROOT_DIR/backend"
 nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > "$ROOT_DIR/.run/backend.log" 2>&1 &
 BACKEND_PID=$!
