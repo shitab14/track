@@ -37,7 +37,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Format output matching the exact structure defined in `task_resources/README.md`.
   - Validate output against `seed.json` initial state and commit `rules_report.json`.
 
-- [ ] **ADR0006: Server-Side Authorization & Role-Based Access Control (RBAC)**
+- [x] **ADR0006: Server-Side Authorization & Role-Based Access Control (RBAC)**
   - Implement user switcher / session simulation for seeded users (`u1` to `u9`).
   - Enforce server-side permissions:
     - Admin: full permissions across all teams.
