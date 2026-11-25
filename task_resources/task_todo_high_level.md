@@ -20,7 +20,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Implement Monday-to-Sunday weekly boundary calculation in `America/Chicago` company timezone.
   - Implement quarter calculations and calendar due date evaluation for overdue status.
 
-- [ ] **ADR0003: Database Seeding & Idempotent Migration Strategy**
+- [x] **ADR0003: Database Seeding & Idempotent Migration Strategy**
   - Implement database seeder loading from `seed.json`.
   - Ensure entity IDs match exactly (`u1`, `m1`, `t12`, `r1`, `team_lead`, etc.).
   - Ensure re-running `docker compose up` or re-running the seed script is completely idempotent and safe.
