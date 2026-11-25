@@ -4,17 +4,17 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
 
 ---
 
-- [ ] **ADR0000: Project Foundation & Tech Stack Architecture**
+- [x] **ADR0000: Project Foundation & Tech Stack Architecture**
   - Define folder structure, workspace organization (Next.js TypeScript frontend, FastAPI backend, PostgreSQL database).
   - Docker Compose configuration setup with networking, volume persistence, and environment variable handling (`APP_NOW`, database URL, CORS).
   - Setup linting, typing, and standard toolchains.
 
-- [ ] **ADR0001: Data Modeling & Schema Design in PostgreSQL**
+- [x] **ADR0001: Data Modeling & Schema Design in PostgreSQL**
   - Design relational schema for: Companies, Teams, Users, Team Memberships, Measurables, Scores, Rocks, Milestones, Issues, To-Dos, Meetings, Meeting Attendees, and Meeting Ratings.
   - Implement constraints for source tracking (Issue linked to Measurable + week; To-Do linked to Issue).
   - Define migration strategy (e.g. Alembic for FastAPI / PostgreSQL).
 
-- [ ] **ADR0002: Time, Timezone & Simulated Clock (`APP_NOW`) Architecture**
+- [x] **ADR0002: Time, Timezone & Simulated Clock (`APP_NOW`) Architecture**
   - Establish UTC timestamp storage standard.
   - Centralize `APP_NOW` retrieval mechanism (defaulting to `2026-11-11T15:00:00Z`).
   - Implement Monday-to-Sunday weekly boundary calculation in `America/Chicago` company timezone.
