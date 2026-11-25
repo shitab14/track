@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +18,14 @@ const roleBadge: Record<string, string> = {
 
 export function Header({ activeTeamId }: { activeTeamId: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { userId, setUserId } = useUser();
   const { data: users } = useUsers();
   const { data: teams } = useTeams();
+
+  const onMeeting = pathname?.endsWith("/meeting");
+  const navLink = (active: boolean) =>
+    `rounded-md px-2.5 py-1 text-xs font-medium ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`;
 
   const currentUser = users?.find((u) => u.id === userId);
 
@@ -52,6 +58,14 @@ export function Header({ activeTeamId }: { activeTeamId: string }) {
               </SelectContent>
             </Select>
           )}
+          <nav className="ml-1 flex items-center gap-1">
+            <Link href={`/teams/${activeTeamId}`} className={navLink(!onMeeting)}>
+              Team
+            </Link>
+            <Link href={`/teams/${activeTeamId}/meeting`} className={navLink(!!onMeeting)}>
+              Meeting
+            </Link>
+          </nav>
         </div>
 
         <div className="flex items-center gap-2">

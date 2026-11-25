@@ -72,7 +72,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Implement To-Dos list (overdue flagging, completion rate widget, done/undo toggle).
   - Implement Rocks section (read-only view with expandable milestones and progress bars).
 
-- [ ] **ADR0012: Frontend Meeting Page & Real-Time Facilitation UI**
+- [x] **ADR0012: Frontend Meeting Page & Real-Time Facilitation UI**
   - Implement Level 10 Meeting view reusing Scorecard and IDS sections.
   - Real-time synced timer bar and section navigator (facilitator-only controls).
   - Attendee roster and live rating interface in Conclude step.

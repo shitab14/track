@@ -5,6 +5,8 @@ import { apiRequest, ApiError } from "./api-client";
 import { useUser } from "./user-context";
 import type {
   IssuesData,
+  MeetingState,
+  MeetingSummary,
   Owner,
   Rock,
   Scorecard,
@@ -116,6 +118,58 @@ export const useToggleTodo = (teamId?: string) =>
     teamId,
     ({ todoId, done }, userId) => post(`/todos/${todoId}/${done ? "done" : "undo"}`, {}, userId),
     ["todos"]
+  );
+
+// ---- Meetings ------------------------------------------------------------
+export const useActiveMeeting = (teamId?: string) =>
+  useApiQuery<MeetingState | null>(
+    ["active-meeting", teamId],
+    `/teams/${teamId}/active-meeting`,
+    !!teamId
+  );
+
+export const useMeetingSummary = (meetingId?: string) =>
+  useApiQuery<MeetingSummary>(["summary", meetingId], `/meetings/${meetingId}/summary`, !!meetingId);
+
+export const useStartMeeting = (teamId?: string) =>
+  useTeamMutation<void>(teamId, (_args, userId) => post(`/teams/${teamId}/meetings`, {}, userId), [
+    "active-meeting",
+  ]);
+
+export const useJoinMeeting = (teamId?: string) =>
+  useTeamMutation<{ meetingId: string }>(
+    teamId,
+    ({ meetingId }, userId) => post(`/meetings/${meetingId}/join`, {}, userId),
+    []
+  );
+
+export const useAdvanceMeeting = (teamId?: string) =>
+  useTeamMutation<{ meetingId: string }>(
+    teamId,
+    ({ meetingId }, userId) => post(`/meetings/${meetingId}/advance`, {}, userId),
+    []
+  );
+
+export const useEndMeeting = (teamId?: string) =>
+  // Do not invalidate active-meeting here: the SSE "ended" snapshot keeps the
+  // room mounted so it can render the immutable summary. Re-entering the route
+  // refetches active-meeting (now null) and returns to the start screen.
+  useTeamMutation<{ meetingId: string }>(
+    teamId,
+    ({ meetingId }, userId) => post(`/meetings/${meetingId}/end`, {}, userId),
+    []
+  );
+
+export const useRateMeeting = (teamId?: string) =>
+  useTeamMutation<{ meetingId: string; rating: number }>(
+    teamId,
+    ({ meetingId, rating }, userId) =>
+      apiRequest(`/meetings/${meetingId}/rating`, {
+        method: "PUT",
+        body: JSON.stringify({ rating }),
+        userId,
+      }),
+    []
   );
 
 export { ApiError };

@@ -111,3 +111,42 @@ export interface Rock {
   progress: { done: number; total: number; percent: number };
   milestones: Milestone[];
 }
+
+export type MeetingSection = "scorecard" | "ids" | "conclude" | "ended";
+
+export interface Attendee {
+  id: string;
+  name: string;
+  joined_at: string | null;
+}
+
+export interface MeetingRatings {
+  values: Record<string, number>;
+  count: number;
+  average: number | null;
+}
+
+export interface MeetingState {
+  id: string;
+  team_id: string;
+  facilitator_id: string;
+  section: MeetingSection;
+  section_started_at: string | null;
+  section_budget_seconds: number | null;
+  elapsed_seconds: number | null;
+  over_time: boolean;
+  server_now: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  attendees: Attendee[];
+  ratings: MeetingRatings;
+}
+
+export interface MeetingSummary {
+  scorecard_week: string;
+  measurable_status: Record<string, string>;
+  issues_solved: string[];
+  todos_created: string[];
+  attendee_ids: string[];
+  rating: number | null;
+}
