@@ -25,7 +25,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Ensure entity IDs match exactly (`u1`, `m1`, `t12`, `r1`, `team_lead`, etc.).
   - Ensure re-running `docker compose up` or re-running the seed script is completely idempotent and safe.
 
-- [ ] **ADR0004: Domain Business Rules Engine**
+- [x] **ADR0004: Domain Business Rules Engine**
   - Implement Measurable status calculation (`at_least`, `at_most`, `between`, `exactly`, handling boundary, closed weeks, and pending current week).
   - Implement To-Do completion rate calculation (target 90%, exact ratio evaluation, round half up).
   - Implement Rock status and progress calculations (handling overdue milestones vs today's date).
