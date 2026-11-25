@@ -64,7 +64,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Strategy to keep historical meeting summaries immutable even after subsequent data edits.
   - Serve summary for ended meetings (including seeded `mt1` and `mt2`).
 
-- [ ] **ADR0011: Frontend UI Architecture & Team Page Implementation**
+- [x] **ADR0011: Frontend UI Architecture & Team Page Implementation**
   - Setup Next.js with TypeScript, Tailwind CSS, and shadcn/ui.
   - Build header with seeded user switcher and accessible team selector.
   - Implement Scorecard table (13-week grid with inline editing & "Make it an Issue" triggers).

@@ -54,6 +54,9 @@ yarn-error.log*
 # Runtime PIDs & Local execution logs
 .run/
 
+# Frontend source wrongly caught by the broad Python 'lib/' rule above
+!frontend/src/lib/
+
 # IDEs & OS files
 .idea/
 .vscode/
