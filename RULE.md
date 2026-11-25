@@ -4,10 +4,11 @@ This document establishes the mandatory engineering rules for building the produ
 
 ---
 
-## 1. ADR-Driven Progression Rule
+## 1. ADR-Driven Progression & Two-Stage Review Rule
 * Every major feature, database change, or architectural milestone must have a corresponding Architectural Decision Record in `adr/ADRXXXX.md`.
-* Each ADR must be submitted to the user and **reviewed/approved before execution**.
-* Never begin implementing an ADR's tasks before obtaining explicit approval.
+* **Stage 1 (Design Review)**: Each ADR document must be submitted to the user and **reviewed/approved before any implementation begins**. Never begin execution without explicit design approval.
+* **Stage 2 (Execution Review)**: After the approved tasks are implemented and tested, the execution output, diffs, and verification results must be **reviewed and approved by the human reviewer before finalizing/proceeding**.
+* **Human in the Loop**: A human reviewer must review and approve every commit and transition.
 
 ---
 
@@ -27,7 +28,13 @@ This document establishes the mandatory engineering rules for building the produ
 
 ---
 
-## 3. Architecture & Code Style Rules
+## 3. Dependency & Library Management Rule (Zero Bloat)
+* **No Unnecessary Libraries**: External packages or libraries must NOT be introduced if the task can be cleanly solved using the standard library or existing dependencies.
+* Always prioritize native language capabilities (e.g., standard library math, date/time, built-in data structures) to keep the project lightweight, secure, and easily understandable.
+
+---
+
+## 4. Architecture & Code Style Rules
 * **Clean Architecture**: Clear separation of concerns across Routing, Services, Domain, Database Models, and UI Presentation.
 * **SOLID & KISS Principles**: Keep solutions simple, direct, and readable so junior developers can easily understand and contribute.
 * **Response Envelope Standard**:
@@ -43,13 +50,13 @@ This document establishes the mandatory engineering rules for building the produ
 
 ---
 
-## 4. Security & Environment Protection Rule
+## 5. Security & Environment Protection Rule
 * Never commit real secrets, environment variables (`.env`, `.env.local`, `.env.*`), virtual environments (`.venv`), or build artifacts (`.next/`, `node_modules/`, `__pycache__/`).
 * All environment configuration templates must be tracked exclusively via committed `.env.example` files.
 
 ---
 
-## 5. Independent Executable Scripts Rule
+## 6. Independent Executable Scripts Rule
 * Frontend, Backend, and Database must remain runnable independently.
 * Every service must maintain its own `scripts/` folder with executable bash runners (e.g., `run_fe.sh`, `run_be.sh`, `test_be.sh`, `seed_db.sh`).
 * Setup and execution instructions must be documented in `HOW_TO_RUN.md`.
