@@ -14,7 +14,8 @@ def serialize_todo(todo, now=None):
 def list_todos(db: Session, team: Team):
     now = clock.get_app_now_utc()
     todos = db.query(Todo).options(joinedload(Todo.owner)).filter_by(team_id=team.id).order_by(Todo.due_date, Todo.id).all()
-    week_start = clock.get_current_week_start(now)
+    # Spec 2.5: the widget shows the LAST CLOSED week's completion rate.
+    week_start = clock.get_last_closed_week_start(now)
     _, week_end = clock.get_week_range(week_start)
     due = [t for t in todos if week_start <= t.due_date <= week_start + timedelta(days=6)]
     completion = compute_todo_completion_rate(due, week_end)

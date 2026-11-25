@@ -1,9 +1,20 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from app.core.response import ApiResponse
 from app.api.deps import get_current_user, require_team_read, require_team_write
+from app.db.session import get_db
 from app.models import User, Team
 
 router = APIRouter()
+
+@router.get("/users", response_model=ApiResponse[list])
+def list_seeded_users(db: Session = Depends(get_db)):
+    """Lists the seeded users for the header user switcher (login stand-in)."""
+    users = db.query(User).order_by(User.id).all()
+    return ApiResponse.success(
+        [{"id": u.id, "name": u.name, "role": u.role} for u in users],
+        "Seeded users",
+    )
 
 @router.get("/me", response_model=ApiResponse[dict])
 def get_current_user_profile(user: User = Depends(get_current_user)):
