@@ -45,12 +45,12 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
     - Observer: read-only access within assigned teams.
   - Verify team boundaries (reject access to non-member teams, even by guessed ID).
 
-- [ ] **ADR0007: Core REST API Design & CRUD Endpoints**
+- [x] **ADR0007: Core REST API Design & CRUD Endpoints**
   - Design and document REST API endpoints using FastAPI OpenAPI / Swagger.
   - Endpoints for Team switcher and Team summary data (Scorecard, Issues, To-Dos, Rocks).
   - Endpoints to edit scores inline, toggle To-Do completion (done / undo), solve issues with required notes.
 
-- [ ] **ADR0008: Concurrency & Idempotency: "Make it an Issue"**
+- [x] **ADR0008: Concurrency & Idempotency: "Make it an Issue"**
   - Design unique constraint or atomic transaction mechanism to prevent duplicate Issues for the same Measurable and week.
   - Handle race conditions gracefully when multiple users click "Make it an Issue" simultaneously.
 
