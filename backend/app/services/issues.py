@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.core import clock
 from app.domain.rules import sort_issues
-from app.models import Issue, Score, Team
+from app.models import Issue, Meeting, Score, Team
 
 
 def serialize_issue(issue):
@@ -41,6 +41,10 @@ def solve_issue(db: Session, issue: Issue, note: str):
     if issue.solved_at is not None:
         raise HTTPException(409, "Issue already solved")
     issue.solved_at = clock.get_app_now_utc(); issue.resolution_note = note.strip()
+    # ADR0010: attribute the solve to the team's active meeting, if any.
+    active = db.query(Meeting).filter_by(team_id=issue.team_id, ended_at=None).first()
+    if active:
+        issue.solved_in_meeting_id = active.id
     db.commit(); db.refresh(issue)
     return serialize_issue(get_issue_for_write(db, issue.id))
 

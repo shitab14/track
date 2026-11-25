@@ -59,7 +59,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Manage Level 10 Meeting state machine: Facilitator controls, Section agenda (Scorecard 5m -> IDS 60m -> Conclude 10m), server-owned timer.
   - Handle attendee presence, live rating submissions, late joins, and browser reconnects.
 
-- [ ] **ADR0010: Meeting Lifecycle & Historical Summary Snapshot Strategy**
+- [x] **ADR0010: Meeting Lifecycle & Historical Summary Snapshot Strategy**
   - Capture meeting summary snapshot upon meeting conclusion (Measurables status for last closed week, Issues solved, To-Dos created, ratings).
   - Strategy to keep historical meeting summaries immutable even after subsequent data edits.
   - Serve summary for ended meetings (including seeded `mt1` and `mt2`).

@@ -14,6 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     Index,
     Text,
+    JSON,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -171,6 +172,8 @@ class Issue(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     solved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     resolution_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # ADR0010: meeting an issue was solved in (clock-independent "solved during")
+    solved_in_meeting_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("meetings.id", ondelete="SET NULL"), nullable=True)
 
     team: Mapped["Team"] = relationship("Team", back_populates="issues")
     owner: Mapped["User"] = relationship("User")
@@ -209,6 +212,8 @@ class Todo(Base):
     due_date: Mapped[date] = mapped_column(Date, nullable=False)
     done_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # ADR0010: meeting a to-do was created in (clock-independent "created during")
+    created_in_meeting_id: Mapped[Optional[str]] = mapped_column(String, ForeignKey("meetings.id", ondelete="SET NULL"), nullable=True)
 
     team: Mapped["Team"] = relationship("Team", back_populates="todos")
     owner: Mapped["User"] = relationship("User")
@@ -225,6 +230,8 @@ class Meeting(Base):
     ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     current_section: Mapped[str] = mapped_column(String, default="scorecard", nullable=False)
     section_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # ADR0010: immutable summary frozen at conclusion (null for seeded meetings)
+    summary_snapshot: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
 
     team: Mapped["Team"] = relationship("Team", back_populates="meetings")
     facilitator: Mapped["User"] = relationship("User")

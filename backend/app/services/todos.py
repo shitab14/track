@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException
 from app.core import clock
 from app.domain.rules import compute_todo_completion_rate
-from app.models import Issue, Todo, Team, User
+from app.models import Issue, Meeting, Todo, Team, User
 
 
 def serialize_todo(todo, now=None):
@@ -29,6 +29,10 @@ def create_todo(db: Session, issue: Issue, current_user: User, title: str, owner
     if not any(m.team_id == issue.team_id for m in owner.memberships) and owner.role != "admin":
         raise HTTPException(422, "Todo owner must belong to the issue's team")
     todo = Todo(id=f"td_{uuid4().hex}", team_id=issue.team_id, owner_id=owner.id, source_issue_id=issue.id, title=title.strip(), due_date=due_date or (clock.get_today_company() + timedelta(days=7)))
+    # ADR0010: attribute creation to the team's active meeting, if any.
+    active = db.query(Meeting).filter_by(team_id=issue.team_id, ended_at=None).first()
+    if active:
+        todo.created_in_meeting_id = active.id
     db.add(todo); db.commit(); db.refresh(todo)
     todo = db.query(Todo).options(joinedload(Todo.owner)).filter_by(id=todo.id).one()
     return serialize_todo(todo)

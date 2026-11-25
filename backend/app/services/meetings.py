@@ -13,9 +13,11 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
+from app.core import clock
 from app.core.broadcaster import broadcaster
 from app.domain.rules import compute_meeting_rating
-from app.models import Meeting, MeetingAttendee, MeetingRating, User
+from app.domain.summary import compute_meeting_summary
+from app.models import Issue, Meeting, MeetingAttendee, MeetingRating, Todo, User
 
 # Forward-only agenda with the seeded section budgets (minutes).
 SECTION_ORDER = ["scorecard", "ids", "conclude", "ended"]
@@ -177,6 +179,26 @@ def _require_facilitator(meeting: Meeting, user: User) -> None:
         raise HTTPException(403, "Only the facilitator can control the meeting")
 
 
+def _capture_summary(db: Session, meeting: Meeting) -> dict:
+    """Freeze the meeting's summary at conclusion (ADR0010). Uses explicit
+    in-meeting attribution and APP_NOW as the business reference instant."""
+    solved_ids = sorted(i.id for i in db.query(Issue).filter_by(solved_in_meeting_id=meeting.id).all())
+    created_ids = sorted(t.id for t in db.query(Todo).filter_by(created_in_meeting_id=meeting.id).all())
+    return compute_meeting_summary(
+        db, meeting, clock.get_app_now_utc(), solved_ids=solved_ids, created_ids=created_ids
+    )
+
+
+def get_meeting_summary(db: Session, meeting: Meeting) -> dict:
+    """Return the frozen snapshot for an app-concluded meeting, or compute it for
+    a seeded ended meeting. A meeting that has not ended has no summary."""
+    if meeting.ended_at is None:
+        raise HTTPException(409, "Meeting has not ended")
+    if meeting.summary_snapshot is not None:
+        return meeting.summary_snapshot
+    return compute_meeting_summary(db, meeting, as_of_utc=_as_utc(meeting.started_at))
+
+
 def advance_meeting(db: Session, meeting_id: str, user: User) -> Meeting:
     """Advance to the next section under a row lock so a double-click cannot skip
     a section. Facilitator only; terminal once ended."""
@@ -193,6 +215,7 @@ def advance_meeting(db: Session, meeting_id: str, user: User) -> Meeting:
     meeting.section_started_at = now
     if nxt == "ended":
         meeting.ended_at = now
+        meeting.summary_snapshot = _capture_summary(db, meeting)
     db.commit()
     db.refresh(meeting)
     _publish_state(db, meeting)
@@ -212,6 +235,7 @@ def end_meeting(db: Session, meeting_id: str, user: User) -> Meeting:
     meeting.current_section = "ended"
     meeting.ended_at = now
     meeting.section_started_at = now
+    meeting.summary_snapshot = _capture_summary(db, meeting)
     db.commit()
     db.refresh(meeting)
     _publish_state(db, meeting)

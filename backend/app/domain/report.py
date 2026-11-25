@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core import clock
 from app.domain import rules
+from app.domain.summary import compute_meeting_summary
 from app.models import (
     Team,
     Measurable,
@@ -96,60 +97,10 @@ def generate_rules_report(db: Session, now_utc: Optional[datetime] = None) -> Di
         meetings_report: Dict[str, Any] = {}
 
         for mt in ended_meetings:
-            # Scorecard week is the last closed week as of the meeting's started_at in company time
-            mt_started_company = clock.get_app_now_company(mt.started_at)
-            mt_week_start = clock.get_week_start(mt_started_company.date())
-            # Last closed week is 7 days before meeting's current week
-            scorecard_week = (mt_week_start.fromordinal(mt_week_start.toordinal() - 7)).isoformat()
-
-            # Measurable statuses for that scorecard week
-            mt_measurable_status: Dict[str, str] = {}
-            for m in team_measurables:
-                m_score = db.query(Score).filter_by(measurable_id=m.id, week_start=date.fromisoformat(scorecard_week)).first()
-                score_val = m_score.value if m_score else None
-                mt_measurable_status[m.id] = rules.compute_measurable_status(
-                    goal_type=m.goal_type,
-                    goal_value=m.goal_value,
-                    goal_min=m.goal_min,
-                    goal_max=m.goal_max,
-                    score_value=score_val,
-                    is_closed_week=True,
-                )
-
-            # Issues solved during the meeting (started_at <= solved_at <= ended_at)
-            solved_during = [
-                iss.id for iss in db.query(Issue).filter_by(team_id=team.id).filter(
-                    Issue.solved_at >= mt.started_at,
-                    Issue.solved_at <= mt.ended_at
-                ).all()
-            ]
-            solved_during.sort()
-
-            # To-Dos created during the meeting (started_at <= created_at <= ended_at)
-            created_during = [
-                t.id for t in db.query(Todo).filter_by(team_id=team.id).filter(
-                    Todo.created_at >= mt.started_at,
-                    Todo.created_at <= mt.ended_at
-                ).all()
-            ]
-            created_during.sort()
-
-            # Attendee IDs sorted as plain strings
-            attendee_ids = [att.user_id for att in mt.attendees]
-            attendee_ids.sort()
-
-            # Rating
-            rating_values = [r.rating for r in mt.ratings]
-            rating_avg = rules.compute_meeting_rating(rating_values)
-
-            meetings_report[mt.id] = {
-                "scorecard_week": scorecard_week,
-                "measurable_status": mt_measurable_status,
-                "issues_solved": solved_during,
-                "todos_created": created_during,
-                "attendee_ids": attendee_ids,
-                "rating": rating_avg,
-            }
+            # Reference instant is the meeting's own start (seeded meetings carry
+            # business-timeline timestamps); in-meeting lists use the timestamp
+            # window. Shared with the API via compute_meeting_summary (ADR0010).
+            meetings_report[mt.id] = compute_meeting_summary(db, mt, as_of_utc=mt.started_at)
 
         report_teams[team.id] = {
             "measurable_status": measurable_status,

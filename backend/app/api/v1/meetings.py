@@ -24,6 +24,7 @@ from app.services.meetings import (
     end_meeting,
     get_active_meeting,
     get_meeting,
+    get_meeting_summary,
     join_meeting,
     serialize_state,
     set_rating,
@@ -104,6 +105,15 @@ def rate(meeting_id: str, body: RatingInput, user: User = Depends(get_current_us
     verify_team_access(team_id=meeting.team_id, write=True, current_user=user, db=db)
     meeting = set_rating(db, meeting, user, body.rating)
     return ApiResponse.success(serialize_state(db, meeting), "Rating saved")
+
+
+@router.get("/meetings/{meeting_id}/summary")
+def meeting_summary(meeting_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Return an ended meeting's summary (frozen snapshot, or computed for seeded
+    meetings). Available for any ended meeting, including seeded mt1/mt2."""
+    meeting = get_meeting(db, meeting_id)
+    verify_team_access(team_id=meeting.team_id, write=False, current_user=user, db=db)
+    return ApiResponse.success(get_meeting_summary(db, meeting), "Meeting summary")
 
 
 @router.get("/meetings/{meeting_id}/events")
