@@ -104,6 +104,24 @@ def test_rock_status_and_progress():
     # 1 done of 3 -> 33%
     assert progress == 33
 
+def test_rock_no_milestones_and_seeded_status():
+    today = date(2026, 11, 11)
+
+    # No milestones: the seeded status stands and progress is 0.
+    r_none = Rock(id="r4", team_id="team_lead", owner_id="u1", title="Vision", quarter="2026-Q4", status="on_track")
+    r_none.milestones = []
+    assert rules.compute_rock_status_and_progress(r_none, today) == ("on_track", 0)
+
+    # Seeded Off-track with no past-due milestone is still off_track.
+    r_off = Rock(id="r5", team_id="team_lead", owner_id="u1", title="Expansion", quarter="2026-Q4", status="off_track")
+    r_off.milestones = [
+        Milestone(id="ms6", rock_id="r5", title="Plan", due_date=date(2026, 11, 20), done=False),
+    ]
+    status, progress = rules.compute_rock_status_and_progress(r_off, today)
+    assert status == "off_track"
+    assert progress == 0
+
+
 def test_issue_sorting():
     i1 = Issue(id="i1", team_id="team_lead", owner_id="u1", title="Low priority", priority=1,
                created_at=datetime(2026, 10, 1, tzinfo=timezone.utc))
