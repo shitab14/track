@@ -8,6 +8,15 @@ echo "========================================================"
 echo "   Stopping TRACK - EOS Management System Locally"
 echo "========================================================"
 
+# --docker / -d: stop the FULL containerized stack (pass --clean to wipe data).
+for arg in "$@"; do
+  case "$arg" in
+    --docker|-d)
+      exec "$ROOT_DIR/scripts/docker_down.sh" "$@"
+      ;;
+  esac
+done
+
 # 1. Stop Frontend
 if [ -f "$ROOT_DIR/.run/frontend.pid" ]; then
     PID=$(cat "$ROOT_DIR/.run/frontend.pid")
@@ -34,10 +43,12 @@ else
 fi
 echo "==> Backend stopped."
 
-# 3. Stop PostgreSQL Docker Container
-echo "==> Stopping PostgreSQL Docker container..."
-docker compose -f docker-compose.db.yml down
-echo "==> PostgreSQL stopped."
+# 3. Stop Docker containers (the DB-only container and/or the full stack,
+#    whichever is running).
+echo "==> Stopping Docker containers..."
+docker compose -f docker-compose.db.yml down 2>/dev/null || true
+docker compose down 2>/dev/null || true
+echo "==> Docker containers stopped."
 
 echo ""
 echo "========================================================"

@@ -21,7 +21,29 @@ To run the **entire stack locally** (PostgreSQL Database + Database Migrations +
 ```bash
 ./scripts/stop_all.sh
 ```
-* Gracefully terminates the Frontend, Backend, and stops the PostgreSQL Docker container.
+* Gracefully terminates the Frontend, Backend, and stops any Docker containers
+  (the DB-only container and/or the full stack).
+
+### Fully containerized stack (Docker)
+
+To run everything in Docker (PostgreSQL + backend + frontend) instead of the
+hybrid run above:
+
+```bash
+./scripts/docker_up.sh            # docker compose up -d --build, waits for health
+./scripts/docker_down.sh          # stop (add --clean to also wipe the DB volume)
+```
+
+`docker_up.sh` takes `--no-build` to skip rebuilding. The same mode is available
+through the master scripts with a flag:
+
+```bash
+./scripts/start_all.sh --docker   # == docker_up.sh
+./scripts/stop_all.sh --docker    # == docker_down.sh  (pass --clean to wipe data)
+```
+
+Equivalent to plain `docker compose up` / `docker compose down`; see the
+[root README](README.md) and [HOW_TO_DEPLOY.md](HOW_TO_DEPLOY.md).
 
 ---
 

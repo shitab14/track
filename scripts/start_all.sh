@@ -9,6 +9,17 @@ echo "========================================================"
 echo "   Starting TRACK - EOS Management System Locally"
 echo "========================================================"
 
+# --docker / -d: run the FULL containerized stack (db + backend + frontend)
+# instead of the hybrid run below (Docker DB + native backend/frontend).
+for arg in "$@"; do
+  case "$arg" in
+    --docker|-d)
+      echo "==> Docker mode: delegating to scripts/docker_up.sh"
+      exec "$ROOT_DIR/scripts/docker_up.sh"
+      ;;
+  esac
+done
+
 mkdir -p "$ROOT_DIR/.run"
 
 # 1. Start Database (Auto-detect Docker vs Local PostgreSQL)
