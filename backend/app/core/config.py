@@ -6,7 +6,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/track_db"
+    # Driver pinned explicitly: SQLAlchemy 2.1 defaults postgresql:// to psycopg3.
+    DATABASE_URL: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/track_db"
     
     # Simulated Clock & Timezone
     APP_NOW: str = "2026-11-11T15:00:00Z"

@@ -29,7 +29,7 @@ services:
     container_name: track_backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/track_db
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/track_db
       APP_NOW: "2026-11-11T15:00:00Z"
       COMPANY_TIMEZONE: America/Chicago
     depends_on:
