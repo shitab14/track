@@ -13,6 +13,7 @@ This document establishes the mandatory engineering rules for building the produ
 ---
 
 ## 2. Commit Message & Git Workflow Rules
+* **Human Approval Before Every Commit (MANDATORY)**: Never create a commit before an explicit human approval of the staged changes. Stage the work, present the diff/summary for review, and wait for the reviewer's go-ahead; only then run `git commit`. This applies to every branch and is strictly required for the protected default branch (`main`). Do not commit automatically as part of executing an approved task — approval of the work is not approval to commit it.
 * Commit messages must always be **short, precise, and meaningful**.
 * Commit messages must **always include the ADR number** in parentheses at the end.
 * **Commit Style & Format**:
