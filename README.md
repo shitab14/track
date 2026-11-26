@@ -19,7 +19,8 @@ Starts PostgreSQL, the API (migrations + idempotent seed run automatically) and
 the web app:
 
 - Web app → **http://localhost:3000**
-- API docs (OpenAPI) → **http://localhost:8000/docs**
+- API docs (OpenAPI/Swagger) → **http://localhost:8000/docs** · written reference
+  in [`api_docs/`](api_docs/README.md)
 
 The seed is safe to re-run, so `docker compose up` again never duplicates data.
 `docker compose down` keeps the data volume; add `-v` to reset it.
