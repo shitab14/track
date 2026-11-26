@@ -1,0 +1,57 @@
+# Full stack: `docker compose up` starts PostgreSQL, the FastAPI backend
+# (migrations + idempotent seed on start) and the Next.js frontend (ADR0014).
+#   Frontend  -> http://localhost:3000
+#   API docs  -> http://localhost:8000/docs
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: track_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: track_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_track:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d track_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: track_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/track_db
+      APP_NOW: "2026-11-11T15:00:00Z"
+      COMPANY_TIMEZONE: America/Chicago
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Baked into the client bundle; the browser (on the host) reaches the API here.
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    container_name: track_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata_track:
+    name: track_pgdata

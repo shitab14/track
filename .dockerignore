@@ -1,0 +1,15 @@
+# Backend build context is the repo root; keep it small and secret-free.
+**/node_modules
+**/.venv
+**/.next
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
+**/.DS_Store
+.git
+.run
+frontend
+*.log
+**/.env
+**/.env.*
+!**/.env.example
