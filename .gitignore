@@ -40,6 +40,12 @@ coverage/
 .next/
 frontend/.next/
 *.tsbuildinfo
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.cache/
 out/
 frontend/out/
 build/

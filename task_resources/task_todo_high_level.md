@@ -78,7 +78,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Attendee roster and live rating interface in Conclude step.
   - Meeting end flow displaying the immutable summary report.
 
-- [ ] **ADR0013: Automated Testing Suite & Playwright E2E Multi-User Tests**
+- [x] **ADR0013: Automated Testing Suite & Playwright E2E Multi-User Tests**
   - Unit tests for all business rules in 2.6 with edge and boundary cases.
   - API integration tests verifying RBAC (unauthorized team access refusal, Observer write rejection) and concurrent "Make it an Issue" requests.
   - Multi-browser Playwright E2E test verifying real-time sync between facilitator and attendee.

@@ -120,8 +120,56 @@ In case of any HTTP or database error, the response returns the error status wit
 
 ---
 
-## 5. Upcoming Steps on Roadmap
+## 5. Testing (ADR0013)
 
-- **ADR0002**: Timezone and simulated clock (`APP_NOW`) integration.
-- **ADR0003**: Idempotent database seeder (`seed.json`).
-- **ADR0004**: Business Rules Engine.
+Run the **entire test suite** — rule tests, API integration tests, and the
+two-browser real-time E2E — with one command, against the seed data and the
+fixed `APP_NOW` clock:
+
+```bash
+./scripts/test_all.sh
+```
+
+It starts/seeds PostgreSQL, runs `pytest` (rule + API layers), ensures the
+backend API is up, and runs the Playwright E2E.
+
+**One-time prerequisite** for the E2E (installs the Chromium browser):
+
+```bash
+cd frontend && npx playwright install chromium
+```
+
+### Test layers
+
+- **Rule tests** (`backend/tests/test_rules.py`): every business rule in §2.6
+  with boundary cases.
+- **API tests** (`backend/tests/test_rbac.py`, `test_concurrency.py`): a Team
+  Member reading another team is refused, an Observer write is refused, and
+  concurrent *Make it an Issue* requests return a single Issue (a real
+  PostgreSQL thread race).
+- **End-to-end** (`frontend/e2e/meeting-sync.spec.ts`): two browsers in one
+  meeting — the facilitator advances the agenda and the second browser follows
+  via SSE.
+
+Backend tests alone: `./backend/scripts/test_be.sh`. E2E alone (stack running):
+`cd frontend && npm run test:e2e`.
+
+### Fixture & clock strategy
+
+- Unit/rule and pure service tests run on an isolated, freshly **seeded
+  in-memory SQLite** database (fully deterministic).
+- Integration tests run against the **seeded PostgreSQL** via the API and clean
+  up any rows they create, so repeated runs are stable.
+- The business clock is always **`APP_NOW` (`2026-11-11T15:00:00Z`)**; no rule
+  reads the wall clock.
+
+### Failure artifact (Playwright trace)
+
+```bash
+cd frontend
+npm run test:e2e:trace                 # runs a deliberate failing spec with tracing
+npx playwright show-trace test-results/**/trace.zip
+```
+
+The normal suite captures a trace automatically on any failure
+(`trace: retain-on-failure`).
