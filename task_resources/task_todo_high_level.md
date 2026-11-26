@@ -84,7 +84,7 @@ This checklist tracks step-by-step tasks required to build the product. Each ite
   - Multi-browser Playwright E2E test verifying real-time sync between facilitator and attendee.
   - Generate test failure artifact (e.g. Playwright trace).
 
-- [ ] **ADR0014: Production Packaging, Documentation & Submission Artifacts**
+- [x] **ADR0014: Production Packaging, Documentation & Submission Artifacts**
   - Prepare `docker compose up` one-command execution.
   - Write root `README.md` (<= 2 pages: setup, testing, assumptions, limitations, AI usage).
   - Write one-page Architectural Decision Record covering Section 2.8.
