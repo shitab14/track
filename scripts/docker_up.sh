@@ -17,9 +17,23 @@ for arg in "$@"; do
   esac
 done
 
+# Ensure the Docker daemon is running. On macOS, try to launch Docker Desktop
+# and wait for it; otherwise (or if it never comes up) fail with guidance.
 if ! docker info >/dev/null 2>&1; then
-  echo "ERROR: The Docker daemon is not running. Start Docker Desktop and retry."
-  exit 1
+  if [ "$(uname -s)" = "Darwin" ] && [ -d "/Applications/Docker.app" ]; then
+    echo "==> Docker daemon not running. Launching Docker Desktop..."
+    open -a Docker
+    echo "==> Waiting for the Docker daemon (up to 120s)..."
+    for _ in $(seq 1 60); do
+      docker info >/dev/null 2>&1 && break
+      sleep 2
+    done
+  fi
+  if ! docker info >/dev/null 2>&1; then
+    echo "ERROR: The Docker daemon is not running. Start Docker Desktop and retry."
+    exit 1
+  fi
+  echo "==> Docker daemon is ready."
 fi
 
 echo "==> Starting the full stack (docker compose up -d ${BUILD})..."

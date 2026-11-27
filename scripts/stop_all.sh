@@ -8,18 +8,23 @@ echo "========================================================"
 echo "   Stopping TRACK - EOS Management System Locally"
 echo "========================================================"
 
-# --docker / -d: stop the FULL containerized stack (pass --clean to wipe data).
-# --all  / -a: in addition to the app, also stop the native (Homebrew) Postgres
-#              service. Off by default because that Postgres is a shared system
-#              service other projects may rely on.
-STOP_DB=0
+# By default stop_all.sh stops the frontend, backend, Docker containers, and the
+# native (Homebrew) Postgres service (start_all.sh starts that in hybrid mode, so
+# stopping it keeps start/stop symmetric and frees :5432).
+#
+# --docker / -d: stop the FULL containerized stack instead (pass --clean to wipe
+#                data).
+# --all    / -a: after the normal teardown, also QUIT Docker Desktop (symmetric
+#                with docker_up.sh, which launches it). Off by default because
+#                Docker Desktop may be used by other projects.
+QUIT_DOCKER_APP=0
 for arg in "$@"; do
   case "$arg" in
     --docker|-d)
       exec "$ROOT_DIR/scripts/docker_down.sh" "$@"
       ;;
     --all|-a)
-      STOP_DB=1
+      QUIT_DOCKER_APP=1
       ;;
   esac
 done
@@ -57,24 +62,43 @@ docker compose -f docker-compose.db.yml down 2>/dev/null || true
 docker compose down 2>/dev/null || true
 echo "==> Docker containers stopped."
 
-# 4. Stop the native (Homebrew) PostgreSQL service — only with --all/-a.
-#    stop_all.sh normally leaves this running: it is a long-lived macOS
-#    LaunchAgent that auto-starts on login and may be used by other projects,
-#    and start_all.sh falls back to it when Docker is not running.
-if [ "$STOP_DB" -eq 1 ]; then
-    echo "==> Stopping native PostgreSQL service (requested via --all)..."
-    if command -v brew >/dev/null 2>&1; then
-        brew services stop postgresql@16 2>/dev/null \
-            || brew services stop postgresql 2>/dev/null \
-            || echo "    (no Homebrew postgresql service to stop)"
+# 4. Stop the native (Homebrew) PostgreSQL service. start_all.sh starts this in
+#    hybrid mode (when Docker is not running), so stop_all.sh stops it to keep
+#    start/stop symmetric and leave :5432 free. Note: the service is a LaunchAgent
+#    with KeepAlive=true, so `brew services stop` is the correct way to stop it
+#    (killing the process alone would let launchd relaunch it).
+echo "==> Stopping native PostgreSQL service..."
+if command -v brew >/dev/null 2>&1; then
+    brew services stop postgresql@16 2>/dev/null \
+        || brew services stop postgresql 2>/dev/null \
+        || echo "    (no Homebrew postgresql service to stop)"
+else
+    echo "    (Homebrew not found; skipping native Postgres stop)"
+fi
+if lsof -ti:5432 >/dev/null 2>&1; then
+    echo "    NOTE: something is still listening on :5432 (non-brew Postgres"
+    echo "          or Docker). Not force-killing it."
+else
+    echo "==> Native PostgreSQL stopped."
+fi
+
+# 5. With --all/-a, also quit Docker Desktop (symmetric with docker_up.sh
+#    launching it). The GUI app reports to AppleScript as "Docker Desktop" on
+#    current versions and "Docker" on older ones, so try both.
+if [ "$QUIT_DOCKER_APP" -eq 1 ] && [ "$(uname -s)" = "Darwin" ]; then
+    quit_docker=0
+    for app in "Docker Desktop" "Docker"; do
+        if osascript -e "application \"$app\" is running" 2>/dev/null | grep -qi true; then
+            echo "==> Quitting $app..."
+            osascript -e "quit app \"$app\"" 2>/dev/null || true
+            quit_docker=1
+            break
+        fi
+    done
+    if [ "$quit_docker" -eq 1 ]; then
+        echo "==> Docker Desktop quit."
     else
-        echo "    (Homebrew not found; skipping native Postgres stop)"
-    fi
-    if lsof -ti:5432 >/dev/null 2>&1; then
-        echo "    NOTE: something is still listening on :5432 (non-brew Postgres"
-        echo "          or Docker). Not force-killing it."
-    else
-        echo "==> Native PostgreSQL stopped."
+        echo "==> Docker Desktop not running; nothing to quit."
     fi
 fi
 
